@@ -1,0 +1,73 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Depurar com WSL",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/sans_battle",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "pipeTransport": {
+        "debuggerPath": "/usr/bin/gdb",
+        "pipeProgram": "wsl",
+        "pipeArgs": [],
+        "pipeCwd": ""
+      },
+      "setupCommands": [
+        {
+          "description": "Habilitar quebra de impressão para gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "preLaunchTask": "Compilar com WSL",
+      "sourceFileMap": {
+        "/mnt/c": "C:\\"
+      }
+    },
+    {
+      "name": "Depurar no Windows",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/sans_battle.exe",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "miDebuggerPath": "gdb",
+      "setupCommands": [
+        {
+          "description": "Habilitar quebra de impressão para gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "preLaunchTask": "Compilar (Windows)"
+    },
+    {
+      "name": "C/C++ Runner: Debug Session",
+      "type": "cppdbg",
+      "request": "launch",
+      "args": [],
+      "stopAtEntry": false,
+      "externalConsole": true,
+      "cwd": "c:/Users/thiag/OneDrive/Desktop/heartgame",
+      "program": "c:/Users/thiag/OneDrive/Desktop/heartgame/build/Debug/outDebug",
+      "MIMode": "gdb",
+      "miDebuggerPath": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
+    }
+  ]
+}

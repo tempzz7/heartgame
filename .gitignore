@@ -1,0 +1,17 @@
+# Ignorar a pasta raylib para evitar problemas de subrepositório
+/raylib/
+
+# Arquivos compilados
+*.o
+*.exe
+sans_battle
+
+# Arquivos de saída
+/output/
+
+# Arquivos temporários
+*.tmp
+*.temp
+.DS_Store
+desktop.ini
+Thumbs.db 
