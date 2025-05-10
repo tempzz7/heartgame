@@ -29,7 +29,8 @@ typedef enum {
     INTRO,
     BATTLE,
     PHASE_TRANSITION,
-    GAME_OVER
+    GAME_OVER,
+    LORE,
 } GameState;
 
 // Attack Pattern Enumeration
@@ -90,6 +91,8 @@ Rectangle battleBox;
 int frameCounter;
 int score;
 Font gameFont;
+int menuSelected = 0; // 0 = Iniciar Jogo, 1 = Lore
+
 
 // Game phases
 GamePhase phases[3];
@@ -180,7 +183,7 @@ void InitGame(void)
     InitGamePhases();
     
     // Start with random attack pattern for phase 1
-    StartAttackPhase(GetRandomValue(0, TOTAL_PATTERNS-1), 300, phases[0].baseIntensity, 15);
+    StartAttackPhase(GetRandomValue(0, TOTAL_PATTERNS-1), 300, phases[0].baseIntensity, 30);
     
     // Load font
     gameFont = GetFontDefault();
@@ -194,14 +197,27 @@ void UpdateGame(void)
     switch (currentState)
     {
         case INTRO:
-            // Wait for user input to start
-            if (IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_ENTER)) {
-                StartGamePhase(0); // Start with phase 1
+            // Navegação com seta para cima / W
+            if ((IsKeyPressed(KEY_UP) || IsKeyPressed(KEY_W)) && menuSelected > 0) {
+                menuSelected--;
+            }
+
+            // Navegação com seta para baixo / S
+            if ((IsKeyPressed(KEY_DOWN) || IsKeyPressed(KEY_S)) && menuSelected < 1) {
+                menuSelected++;
+            }
+
+            // Seleciona a opção
+            if (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_SPACE)) {
+                if (menuSelected == 0) {
+                    StartGamePhase(0); // Iniciar jogo
+                } else if (menuSelected == 1) {
+                    currentState = LORE; // Vai para o texto de lore
+                }
             }
             break;
 
         case PHASE_TRANSITION:
-            // Count down timer for phase transition
             phaseTransitionTimer--;
             if (phaseTransitionTimer <= 0) {
                 currentState = BATTLE;
@@ -209,23 +225,27 @@ void UpdateGame(void)
             break;
 
         case BATTLE:
-            // Update player and projectiles
             UpdatePlayer();
             UpdateAttackPhase();
             UpdateProjectiles();
             CheckCollisions();
             UpdateGamePhase();
 
-            // Check if player is dead
             if (player.health <= 0) {
                 currentState = GAME_OVER;
             }
             break;
 
         case GAME_OVER:
-            // Wait for restart
             if (IsKeyPressed(KEY_R)) {
                 InitGame();
+            }
+            break;
+
+        case LORE:
+            // Volta ao menu pressionando Backspace, Espaço ou Enter
+            if (IsKeyPressed(KEY_BACKSPACE) || IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_SPACE)) {
+                currentState = INTRO;
             }
             break;
 
@@ -234,59 +254,99 @@ void UpdateGame(void)
     }
 }
 
+
 // Draw game elements
+
+void DrawHeartIcon(Vector2 center, float size, Color color)
+{
+    float radius = size * 0.25f;
+    float offsetX = size * 0.3f;
+    float offsetY = size * 0.15f;
+
+    // Círculos superiores (parte arredondada do coração)
+    DrawCircleV((Vector2){ center.x - offsetX, center.y - offsetY }, radius, color);
+    DrawCircleV((Vector2){ center.x + offsetX, center.y - offsetY }, radius, color);
+
+    // Triângulo inferior (base do coração)
+    Vector2 p1 = { center.x - size * 0.6f, center.y };
+    Vector2 p2 = { center.x + size * 0.6f, center.y };
+    Vector2 p3 = { center.x, center.y + size * 0.9f };
+    DrawTriangle(p1, p2, p3, color);
+}
+
+
+
 void DrawGame(void)
 {
     switch (currentState)
     {
         case INTRO:
-            // Draw intro screen
-            DrawText("HEART", SCREEN_WIDTH/2 - MeasureText("HEART", 60)/2, SCREEN_HEIGHT/3, 60, PURPLE);
-            DrawText("A heart lost between void and hope", SCREEN_WIDTH/2 - MeasureText("A heart lost between void and hope", 20)/2, SCREEN_HEIGHT/2, 20, WHITE);
-            DrawText("Press SPACE or ENTER to start", SCREEN_WIDTH/2 - MeasureText("Press SPACE or ENTER to start", 20)/2, SCREEN_HEIGHT*2/3, 20, GRAY);
-            break;
+        {
+            ClearBackground(BLACK);
+            DrawText("HEART", SCREEN_WIDTH/2 - MeasureText("HEART", 60)/2, 100, 60, PURPLE);
+
+            const char *options[2] = { "Iniciar Jogo", "Lore" };
+            for (int i = 0; i < 2; i++) {
+                Color color = (i == menuSelected) ? WHITE : GRAY;
+                DrawText(options[i], SCREEN_WIDTH/2 - MeasureText(options[i], 30)/2, 250 + i * 40, 30, color);
+            }
+
+            DrawText("Use W/S ou ↑/↓ para navegar", SCREEN_WIDTH/2 - MeasureText("Use W/S ou ↑/↓ para navegar", 20)/2, 350, 20, DARKGRAY);
+            DrawText("Pressione ENTER para selecionar", SCREEN_WIDTH/2 - MeasureText("Pressione ENTER para selecionar", 20)/2, 380, 20, DARKGRAY);
+        }
+        break;
+
+        case LORE:
+        {
+            ClearBackground(BLACK);
+            DrawText("Lore: A Origem do Coração", 50, 60, 30, PURPLE);
+
+            DrawText(
+                "Em um mundo consumido pelo vazio,\n"
+                "uma única centelha de esperança permaneceu: um coração.\n\n"
+                "Perdido, solitário e frágil, esse coração enfrenta forças sombrias\n"
+                "que tentam apagá-lo. Sua missão é resistir,\n"
+                "desviar das sombras e manter viva a esperança.",
+                50, 120, 20, WHITE
+            );
+
+            DrawText("Pressione BACKSPACE para voltar ao menu", 50, 500, 20, GRAY);
+        }
+        break;
 
         case PHASE_TRANSITION:
-            // Draw phase transition screen
             DrawPhaseTransition();
             break;
 
         case BATTLE:
-            // Set background color based on current phase
             ClearBackground(phases[currentPhaseIndex].backgroundColor);
-            
-            // Draw battle box
+
             DrawRectangleLines(battleBox.x, battleBox.y, battleBox.width, battleBox.height, WHITE);
 
-            // Draw player (heart)
-            if (player.isInvulnerable && (frameCounter / 5) % 2 == 0) {
-                // Blinking effect when invulnerable - skip drawing
-            } else {
-                DrawHeart(player.heart);
+            if (!(player.isInvulnerable && (frameCounter / 5) % 2 == 0)) {
+                float scale = 1.0f + 0.1f * sinf(GetTime() * 6.0f);
+                float size = 12.0f * scale;
+                DrawHeartIcon(player.position, size, RED);
             }
 
-            // Draw projectiles
             for (int i = 0; i < MAX_PROJECTILES; i++) {
                 if (projectiles[i].active) {
                     DrawRectangle(
-                        projectiles[i].position.x - projectiles[i].size/2, 
-                        projectiles[i].position.y - projectiles[i].size/2, 
-                        projectiles[i].size, 
-                        projectiles[i].size, 
+                        projectiles[i].position.x - projectiles[i].size / 2,
+                        projectiles[i].position.y - projectiles[i].size / 2,
+                        projectiles[i].size,
+                        projectiles[i].size,
                         phases[currentPhaseIndex].projectileColor
                     );
                 }
             }
 
-            // Draw HUD
             DrawHUD();
-            
-            // Draw current phase indicator
             DrawText(TextFormat("Fase %d", currentPhaseIndex + 1), SCREEN_WIDTH - 100, 50, 20, GRAY);
             break;
 
         case GAME_OVER:
-            // Draw game over screen
+            ClearBackground(BLACK);
             DrawText("Você perdeu tudo...", SCREEN_WIDTH/2 - MeasureText("Você perdeu tudo...", 40)/2, SCREEN_HEIGHT/2 - 40, 40, PURPLE);
             DrawText("Pressione R para recomeçar", SCREEN_WIDTH/2 - MeasureText("Pressione R para recomeçar", 20)/2, SCREEN_HEIGHT/2 + 40, 20, WHITE);
             break;
@@ -296,16 +356,18 @@ void DrawGame(void)
     }
 }
 
+
 // Update player movement and status
 void UpdatePlayer(void)
 {
     // Move with arrow keys
     Vector2 oldPosition = player.position;
 
-    if (IsKeyDown(KEY_RIGHT)) player.position.x += player.speed;
-    if (IsKeyDown(KEY_LEFT)) player.position.x -= player.speed;
-    if (IsKeyDown(KEY_DOWN)) player.position.y += player.speed;
-    if (IsKeyDown(KEY_UP)) player.position.y -= player.speed;
+    if (IsKeyDown(KEY_RIGHT) || IsKeyDown(KEY_D)) player.position.x += player.speed;
+    if (IsKeyDown(KEY_LEFT)  || IsKeyDown(KEY_A)) player.position.x -= player.speed;
+    if (IsKeyDown(KEY_DOWN)  || IsKeyDown(KEY_S)) player.position.y += player.speed;
+    if (IsKeyDown(KEY_UP)    || IsKeyDown(KEY_W)) player.position.y -= player.speed;
+
 
     // Update hitbox to match heart shape
     player.hitbox = GetHeartHitbox(player.heart);
@@ -684,7 +746,7 @@ void InitGamePhases(void)
     phases[0].number = 1;
     phases[0].duration = 30; // 30 seconds
     phases[0].elapsedTime = 0;
-    phases[0].baseIntensity = 1.0f;
+    phases[0].baseIntensity = 0.5f;
     phases[0].backgroundColor = BLACK;
     phases[0].projectileColor = WHITE;
     phases[0].phaseMessage = "A escuridão do vazio";
