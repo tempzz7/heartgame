@@ -1,5 +1,3 @@
-# Ignorar a pasta raylib para evitar problemas de subrepositório
-/raylib/
 
 # Arquivos compilados
 *.o
