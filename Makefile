@@ -2,7 +2,7 @@
 
 CC = gcc
 CFLAGS = -Wall -Wextra -std=c11 -I./raylib/src
-LDFLAGS = -L./raylib/src -lraylib -lm -lpthread -ldl -lrt -lX11
+LDFLAGS = -L./raylib/src -lraylib -lcurl -lm -lpthread -ldl -lrt -lX11
 
 # Nome do executável
 TARGET = heart_battle

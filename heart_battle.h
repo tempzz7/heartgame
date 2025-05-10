@@ -1,131 +1,107 @@
+/*******************************************************************************************
+*
+*   HEART - Header file for heart customization
+*   
+*   Contains functions to draw a heart instead of a simple rectangle
+*
+********************************************************************************************/
+
 #ifndef HEART_BATTLE_H
 #define HEART_BATTLE_H
 
 #include "raylib.h"
+#include <math.h>
 
-// Constantes
-#define MAX_BONES 100     // Número máximo de ossos na tela
-#define MAX_BLASTERS 10   // Número máximo de blasters
-#define MAX_PARTICLES 200 // Número máximo de partículas
-#define MAX_PLATFORMS 10  // Número máximo de plataformas
-#define HP_MAX 100        // HP máximo do jogador
-#define KR_MAX 40         // Karma máxima (barra roxa do vazio)
-
-// Tipos de plataforma
-typedef enum {
-    PLATFORM_NORMAL,
-    PLATFORM_TRAP,
-    PLATFORM_BOUNCE,
-    PLATFORM_MOVING
-} PlatformType;
-
-// Padrões de ataque
-typedef enum {
-    PATTERN_NONE,
-    PATTERN_BONES_BOTTOM,
-    PATTERN_BONES_TOP,
-    PATTERN_BONES_SIDES,
-    PATTERN_BONES_CIRCLE,
-    PATTERN_BLASTERS_SIDES,
-    PATTERN_BLASTERS_CIRCLE,
-    PATTERN_PLATFORMS
-} AttackPattern;
-
-// Estrutura para ossos
+// Structure to represent a heart
 typedef struct {
-    Vector2 pos;
-    float speed;
-    int dir;
-    bool active;
-    Rectangle rect;
-    bool isBlue;
-    float rotation;
-} Bone;
+    Vector2 position;   // Center position of the heart
+    float size;         // Size multiplier (1.0 = normal size)
+    Color color;        // Color of the heart
+    float rotation;     // Rotation angle in degrees
+    float pulse;        // Pulse effect (0.0 - 1.0)
+} Heart;
 
-// Estrutura para Blasters (antigo Gaster Blaster)
-typedef struct {
-    Vector2 pos;
-    Vector2 target;
-    float rotation;
-    int state;  // 0=spawn, 1=charge, 2=fire, 3=fadeout
-    int timer;
-    bool active;
-    Rectangle beam;
-} Blaster;
+// Initialize a heart structure
+static inline Heart InitHeart(Vector2 position, float size, Color color) {
+    Heart heart = {
+        .position = position,
+        .size = size,
+        .color = color,
+        .rotation = 0.0f,
+        .pulse = 0.0f
+    };
+    return heart;
+}
 
-// Estrutura para partículas
-typedef struct {
-    Vector2 pos;
-    Vector2 vel;
-    float size;
-    Color color;
-    float life;
-    bool active;
-} Particle;
+// Draw a heart shape at the specified position
+static inline void DrawHeart(Heart heart) {
+    // Base size for the heart drawing
+    float baseSize = 10.0f * heart.size;
+    
+    // Apply pulse effect to size
+    float pulseEffect = 1.0f + 0.1f * sinf(heart.pulse * PI * 2);
+    baseSize *= pulseEffect;
+    
+    // Points for the heart shape (centered at origin)
+    Vector2 points[10];
+    
+    // Calculate heart shape points
+    // Top curves
+    points[0] = (Vector2){ -baseSize, -baseSize * 0.5f };         // Left curve start
+    points[1] = (Vector2){ -baseSize * 0.5f, -baseSize * 1.2f };  // Left curve control
+    points[2] = (Vector2){ 0, -baseSize * 0.5f };                 // Center top
+    points[3] = (Vector2){ baseSize * 0.5f, -baseSize * 1.2f };   // Right curve control
+    points[4] = (Vector2){ baseSize, -baseSize * 0.5f };          // Right curve end
+    
+    // Bottom point
+    points[5] = (Vector2){ 0, baseSize };                         // Bottom tip
+    
+    // Side curves
+    points[6] = (Vector2){ -baseSize, -baseSize * 0.5f };         // Back to left side
+    
+    // Apply rotation if needed
+    if (heart.rotation != 0) {
+        float cosa = cosf(heart.rotation * DEG2RAD);
+        float sina = sinf(heart.rotation * DEG2RAD);
+        
+        for (int i = 0; i < 7; i++) {
+            float x = points[i].x;
+            float y = points[i].y;
+            points[i].x = x * cosa - y * sina;
+            points[i].y = x * sina + y * cosa;
+        }
+    }
+    
+    // Move all points to the heart position
+    for (int i = 0; i < 7; i++) {
+        points[i].x += heart.position.x;
+        points[i].y += heart.position.y;
+    }
+    
+    // Draw the heart
+    DrawTriangle(points[0], points[2], points[6], heart.color);  // Left half
+    DrawTriangle(points[2], points[4], points[5], heart.color);  // Right half
+    DrawCircleV((Vector2){ points[0].x + baseSize * 0.5f, points[0].y }, baseSize * 0.5f, heart.color); // Left circle
+    DrawCircleV((Vector2){ points[4].x - baseSize * 0.5f, points[4].y }, baseSize * 0.5f, heart.color); // Right circle
+}
 
-// Estrutura para plataformas
-typedef struct {
-    Rectangle rect;
-    PlatformType type;
-    Vector2 vel;
-    bool active;
-    Color color;
-} Platform;
+// Update a heart's pulse animation
+static inline void UpdateHeartPulse(Heart* heart, float deltaTime) {
+    heart->pulse += deltaTime;
+    if (heart->pulse >= 1.0f) {
+        heart->pulse -= 1.0f;
+    }
+}
 
-// Estrutura para a alma do jogador
-typedef struct {
-    Vector2 pos;
-    Vector2 vel;
-    float size;
-    Color color;
-    bool isBlue;  // Modo gravidade
-    bool isRed;   // Modo normal
-    float gravity;
-    float jumpForce;
-    int hp;
-    int kr;
-    int invFrames;
-} Soul;
-
-// Funções para ossos
-void SpawnBone(Vector2 position, Vector2 velocity, bool isBlue, float rotation);
-void UpdateBones(void);
-void DrawBones(void);
-
-// Funções para Blasters
-void SpawnBlaster(Vector2 position, Vector2 target, float rotation);
-void UpdateBlasters(void);
-void DrawBlasters(void);
-
-// Funções para partículas
-void SpawnParticle(Vector2 position, Vector2 velocity, float size, Color color, float life);
-void UpdateParticles(void);
-void DrawParticles(void);
-
-// Funções para plataformas
-void SpawnPlatform(Rectangle rect, PlatformType type, Vector2 velocity);
-void UpdatePlatforms(void);
-void DrawPlatforms(void);
-
-// Funções para a alma
-void DrawSoul(Soul soul);
-void UpdateSoul(void);
-void HandleSoulCollision(void);
-
-// Funções para a arena
-void ChangeArenaSize(Vector2 newSize);
-void UpdateArena(void);
-void DrawArena(void);
-
-// Funções de UI e gameplay
-void DrawHealthBar(int hp, int maxHp);
-void GenerateAttackPattern(AttackPattern pattern);
-void DisplayDialogue(const char* text, bool isVazio);
-void DrawMenu(void);
-void UpdateMenu(void);
-void HandleEnemyTurn(void);
-void HandlePlayerTurn(void);
-void DrawGameOver(void);
-void DrawVictory(void);
+// Get a rectangle representing the heart's hitbox (slightly smaller than visual representation)
+static inline Rectangle GetHeartHitbox(Heart heart) {
+    float hitboxSize = 8.0f * heart.size;
+    return (Rectangle){
+        heart.position.x - hitboxSize,
+        heart.position.y - hitboxSize,
+        hitboxSize * 2,
+        hitboxSize * 2
+    };
+}
 
 #endif // HEART_BATTLE_H
