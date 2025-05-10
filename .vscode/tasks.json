@@ -2,46 +2,31 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Compilar com WSL",
+            "label": "Compilar (Linux)",
             "type": "shell",
-            "command": "wsl",
-            "args": [
-                "--",
-                "make"
-            ],
+            "command": "make",
             "group": {
                 "kind": "build",
                 "isDefault": true
-            },
-            "problemMatcher": [
-                "$gcc"
-            ]
+            }
         },
         {
-            "label": "Executar com WSL",
+            "label": "Executar (Linux)",
             "type": "shell",
-            "command": "wsl",
-            "args": [
-                "--",
-                "./sans_battle"
-            ],
+            "command": "./heart_battle",
             "group": {
                 "kind": "test",
                 "isDefault": true
             },
             "dependsOn": [
-                "Compilar com WSL"
+                "Compilar (Linux)"
             ]
         },
         {
-            "label": "Limpar com WSL",
+            "label": "Limpar (Linux)",
             "type": "shell",
-            "command": "wsl",
-            "args": [
-                "--",
-                "make",
-                "clean"
-            ]
+            "command": "make",
+            "args": ["clean"]
         },
         {
             "label": "Compilar (Windows)",
@@ -63,4 +48,4 @@
             ]
         }
     ]
-} 
+}

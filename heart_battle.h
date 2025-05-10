@@ -1,5 +1,5 @@
-#ifndef SANS_BATTLE_H
-#define SANS_BATTLE_H
+#ifndef HEART_BATTLE_H
+#define HEART_BATTLE_H
 
 #include "raylib.h"
 
@@ -9,7 +9,7 @@
 #define MAX_PARTICLES 200 // Número máximo de partículas
 #define MAX_PLATFORMS 10  // Número máximo de plataformas
 #define HP_MAX 100        // HP máximo do jogador
-#define KR_MAX 40         // Karma máxima (barra roxa do Sans)
+#define KR_MAX 40         // Karma máxima (barra roxa do vazio)
 
 // Tipos de plataforma
 typedef enum {
@@ -42,7 +42,7 @@ typedef struct {
     float rotation;
 } Bone;
 
-// Estrutura para Gaster Blasters
+// Estrutura para Blasters (antigo Gaster Blaster)
 typedef struct {
     Vector2 pos;
     Vector2 target;
@@ -92,7 +92,7 @@ void SpawnBone(Vector2 position, Vector2 velocity, bool isBlue, float rotation);
 void UpdateBones(void);
 void DrawBones(void);
 
-// Funções para Gaster Blasters
+// Funções para Blasters
 void SpawnBlaster(Vector2 position, Vector2 target, float rotation);
 void UpdateBlasters(void);
 void DrawBlasters(void);
@@ -120,7 +120,7 @@ void DrawArena(void);
 // Funções de UI e gameplay
 void DrawHealthBar(int hp, int maxHp);
 void GenerateAttackPattern(AttackPattern pattern);
-void DisplayDialogue(const char* text, bool isSans);
+void DisplayDialogue(const char* text, bool isVazio);
 void DrawMenu(void);
 void UpdateMenu(void);
 void HandleEnemyTurn(void);
@@ -128,4 +128,4 @@ void HandlePlayerTurn(void);
 void DrawGameOver(void);
 void DrawVictory(void);
 
-#endif // SANS_BATTLE_H
+#endif // HEART_BATTLE_H

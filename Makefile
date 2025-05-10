@@ -1,31 +1,18 @@
-# Makefile para o projeto sans_battle (compatível com WSL)
+# Makefile para o projeto heart_battle (Linux, usando raylib local)
 
 CC = gcc
 CFLAGS = -Wall -Wextra -std=c11 -I./raylib/src
-LDFLAGS = -L./raylib/src -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
-
-# Detectar plataforma (WSL vs Windows nativo)
-PLATFORM = $(shell uname -s)
-ifeq ($(PLATFORM),Linux)
-    # Configurações para WSL/Linux
-    RM = rm -f
-    EXE_EXT = 
-else
-    # Configurações para Windows nativo
-    RM = del /Q
-    EXE_EXT = .exe
-    LDFLAGS = -L./raylib/src -lraylib -lopengl32 -lgdi32 -lwinmm
-endif
+LDFLAGS = -L./raylib/src -lraylib -lm -lpthread -ldl -lrt -lX11
 
 # Nome do executável
-TARGET = sans_battle$(EXE_EXT)
+TARGET = heart_battle
 
 # Arquivos fonte
-SRC = sans_battle.c
+SRC = heart_battle.c
 OBJ = $(SRC:.c=.o)
 
 # Regras
-all: $(TARGET)
+all: rayliblib $(TARGET)
 
 $(TARGET): $(OBJ)
 	$(CC) -o $@ $^ $(LDFLAGS)
@@ -34,19 +21,19 @@ $(TARGET): $(OBJ)
 	$(CC) -c $< $(CFLAGS)
 
 # Compilar raylib (se necessário)
-raylib:
-	cd raylib/src && make PLATFORM=PLATFORM_DESKTOP
+rayliblib:
+	$(MAKE) -C raylib/src PLATFORM=PLATFORM_DESKTOP
 
 # Limpar arquivos gerados
 clean:
-	$(RM) $(OBJ) $(TARGET)
+	rm -f $(OBJ) $(TARGET)
 
 # Limpar tudo, incluindo raylib
 cleanall: clean
-	cd raylib/src && make clean
+	$(MAKE) -C raylib/src clean
 
 # Executar o jogo
 run: $(TARGET)
 	./$(TARGET)
 
-.PHONY: all clean cleanall run raylib 
+.PHONY: all clean cleanall run rayliblib

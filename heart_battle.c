@@ -1,4 +1,4 @@
-#include "sans_battle.h"
+#include "heart_battle.h"
 #include "raylib.h"
 #include <stdlib.h>
 #include <math.h>
@@ -21,12 +21,12 @@
 
 // Diálogo
 const char* dialogues[DIALOGUE_MAX] = {
-    "Você sente que vai ter um tempo ruim...",
-    "Sans sorri para você.",
-    "Ossos surgem do chão!",
+    "Você sente um vazio profundo...",
+    "O vazio observa você.",
+    "Fragmentos surgem do chão!",
     "Você sente o peso da gravidade...",
     "A alma ficou azul! Pule para sobreviver.",
-    "Sans: heh. não é fácil, né?",
+    "O vazio: ... não é fácil, né?",
     "Você sobreviveu ao impossível.",
     "Pressione ENTER para recomeçar."
 };
@@ -355,7 +355,7 @@ static void UpdateLore(void) {
 }
 
 int main(void) {
-    InitWindow(SCREEN_W, SCREEN_H, "SANS BATTLE - UNDERTALE STYLE");
+    InitWindow(SCREEN_W, SCREEN_H, "HEART - ENTRE O VAZIO E A ESPERANÇA");
     SetTargetFPS(60);
     InitBattle();
     while (!WindowShouldClose()) {
@@ -396,4 +396,4 @@ void UpdateMenu(void) {}
 void HandleEnemyTurn(void) {}
 void HandlePlayerTurn(void) {}
 void DrawGameOver(void) {}
-void DrawVictory(void) {} 
+void DrawVictory(void) {}

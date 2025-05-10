@@ -1,0 +1,13 @@
+# Pacotes de sistema (instale com apt)
+build-essential
+gcc
+make
+libx11-dev
+libxcursor-dev
+libxrandr-dev
+libxi-dev
+libgl1-mesa-dev
+libglu1-mesa-dev
+libasound2-dev
+libxinerama-dev
+libpthread-stubs0-dev
