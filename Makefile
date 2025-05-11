@@ -5,10 +5,10 @@ CFLAGS = -Wall -Wextra -std=c11 -I./raylib/src
 LDFLAGS = -L./raylib/src -lraylib -lcurl -lm -lpthread -ldl -lrt -lX11
 
 # Nome do executável
-TARGET = heart_battle
+TARGET = heartgame
 
 # Arquivos fonte
-SRC = heart_battle.c
+SRC = main.c game.c player.c attack.c hud.c utils.c
 OBJ = $(SRC:.c=.o)
 
 # Regras
