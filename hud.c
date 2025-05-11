@@ -41,11 +41,13 @@ void HUDDraw(const Game *g) {
     
     switch(g->phase) {
         case PHASE_MENU: phaseName = "Menu"; break;
-        case PHASE_INTRO: phaseName = "Intro"; break;
+        case PHASE_GAME: phaseName = "Game"; break;
         case PHASE_BATTLE: phaseName = "Battle"; break;
         case PHASE_BOSS: phaseName = "Boss"; break;
         case PHASE_WIN: phaseName = "Victory"; break;
         case PHASE_LOSE: phaseName = "Defeat"; break;
+        case PHASE_GAMEOVER: phaseName = "Game Over"; break;
+        case PHASE_TRANSITION: phaseName = "Transition"; break;
     }
     
     sprintf(phaseText, "Phase: %s", phaseName);
@@ -53,6 +55,34 @@ void HUDDraw(const Game *g) {
     
     // Pontuação
     DrawText(TextFormat("Score: %d", g->score), GetScreenWidth() - 150, 36, 20, SKYBLUE);
+    
+    // Mostrar informações do nível atual (se estiver em batalha ou transição)
+    if (g->phase == PHASE_BATTLE || g->phase == PHASE_TRANSITION) {
+        // Nomes dos níveis
+        const char* levelNames[] = {
+            "O Vazio",
+            "Memórias Fragmentadas",
+            "Arrependimentos",
+            "Medos Profundos",
+            "Centelha de Esperança"
+        };
+        
+        // Mostrar nome do nível atual
+        char levelText[64];
+        sprintf(levelText, "Nível %d: %s", g->currentLevel + 1, levelNames[g->currentLevel]);
+        DrawText(levelText, GetScreenWidth() - 300, 10, 20, WHITE);
+        
+        // Barra de progresso do nível (estilo Geometry Dash)
+        DrawRectangle(GetScreenWidth() - 300, 40, 250, 15, DARKGRAY);
+        DrawRectangle(GetScreenWidth() - 300, 40, (250 * g->levelProgress) / 100, 15, 
+                     (Color){100, 200, 255, 255});
+        DrawRectangleLinesEx((Rectangle){GetScreenWidth() - 300, 40, 250, 15}, 1, WHITE);
+        
+        // Mostrar porcentagem de progresso
+        char progressText[16];
+        sprintf(progressText, "%d%%", g->levelProgress);
+        DrawText(progressText, GetScreenWidth() - 50, 38, 18, WHITE);
+    }
     
     // Mensagem temporária com efeito de fade
     if (hudMsgFrames > 0) {
